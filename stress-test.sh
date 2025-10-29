@@ -54,15 +54,15 @@ echo ""
 echo "5. Verificando processamento..."
 
 # Verificar fila do RabbitMQ
-QUEUE_SIZE=$(docker-compose exec -T rabbitmq rabbitmqctl list_queues 2>/dev/null | grep events_queue | awk '{print $2}')
+QUEUE_SIZE=$(docker compose exec -T rabbitmq rabbitmqctl list_queues 2>/dev/null | grep events_queue | awk '{print $2}')
 echo "   - Mensagens na fila: $QUEUE_SIZE"
 
 # Verificar MongoDB
-MONGO_COUNT=$(docker-compose exec -T mongodb mongosh -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --quiet --eval "db.getSiblingDB('events_db').events.countDocuments()" 2>/dev/null)
+MONGO_COUNT=$(docker compose exec -T mongodb mongosh -u admin -p secure_password_123 --authenticationDatabase admin --quiet --eval "db.getSiblingDB('events_db').events.countDocuments()" 2>/dev/null)
 echo "   - Eventos no MongoDB: $MONGO_COUNT"
 
 # Verificar logs de erro
-ERROR_COUNT=$(docker-compose logs 2>/dev/null | grep -i error | wc -l)
+ERROR_COUNT=$(docker compose logs 2>/dev/null | grep -i error | wc -l)
 echo "   - Erros nos logs: $ERROR_COUNT"
 
 echo ""

@@ -6,28 +6,28 @@ help:
 
 build:
 	@echo "Building images..."
-	@./build.sh
+	@docker compose build
 
 up:
 	@echo "Starting services..."
-	@docker-compose up -d
+	@docker compose up -d
 	@make status
 
 down:
 	@echo "Stopping services..."
-	@docker-compose down
+	@docker compose down
 
 logs:
-	@docker-compose logs -f
+	@docker compose logs -f
 
 logs-producer:
-	@docker-compose logs -f producer-1 producer-2 producer-3
+	@docker compose logs -f producer-1 producer-2 producer-3
 
 logs-consumer:
-	@docker-compose logs -f consumer
+	@docker compose logs -f consumer
 
 logs-nginx:
-	@docker-compose logs -f nginx
+	@docker compose logs -f nginx
 
 test:
 	@echo "Running tests..."
@@ -39,7 +39,7 @@ scout:
 
 clean:
 	@echo "Cleaning up..."
-	@docker-compose down -v
+	@docker compose down -v
 	@docker system prune -f
 
 restart:
@@ -47,7 +47,7 @@ restart:
 	@make up
 
 status:
-	@docker-compose ps
+	@docker compose ps
 
 stats:
 	@docker stats --no-stream
@@ -56,10 +56,10 @@ network:
 	@docker network inspect docker_backend
 
 mongo-shell:
-	@docker-compose exec mongodb mongosh -u $$MONGO_INITDB_ROOT_USERNAME -p $$MONGO_INITDB_ROOT_PASSWORD
+	@docker compose exec mongodb mongosh -u $$MONGO_INITDB_ROOT_USERNAME -p $$MONGO_INITDB_ROOT_PASSWORD
 
 rabbitmq-queues:
-	@docker-compose exec rabbitmq rabbitmqctl list_queues
+	@docker compose exec rabbitmq rabbitmqctl list_queues
 
 all: build up test
 

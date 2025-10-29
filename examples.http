@@ -1,0 +1,82 @@
+### Health Check NGINX
+GET http://localhost/health
+
+### Health Check Producer (via NGINX)
+GET http://localhost:8080/health
+
+### Send Event - Smartphone Android
+POST http://localhost/events
+Content-Type: application/json
+
+{
+  "device": "smartphone",
+  "os": "android",
+  "tipo": "click",
+  "valor": "100",
+  "ip": "192.168.1.1",
+  "region": "us-east-1"
+}
+
+### Send Event - Desktop Windows
+POST http://localhost/events
+Content-Type: application/json
+
+{
+  "device": "desktop",
+  "os": "windows",
+  "tipo": "pageview",
+  "valor": "1",
+  "ip": "192.168.1.2",
+  "region": "eu-west-1"
+}
+
+### Send Event - Tablet iOS
+POST http://localhost/events
+Content-Type: application/json
+
+{
+  "device": "tablet",
+  "os": "ios",
+  "tipo": "purchase",
+  "valor": "299.99",
+  "ip": "192.168.1.3",
+  "region": "ap-southeast-1"
+}
+
+### Send Event - Smart TV
+POST http://localhost/events
+Content-Type: application/json
+
+{
+  "device": "smarttv",
+  "os": "tizen",
+  "tipo": "stream",
+  "valor": "3600",
+  "ip": "192.168.1.4",
+  "region": "sa-east-1"
+}
+
+### Send Event - Wearable
+POST http://localhost/events
+Content-Type: application/json
+
+{
+  "device": "wearable",
+  "os": "watchos",
+  "tipo": "heartbeat",
+  "valor": "75",
+  "ip": "192.168.1.5",
+  "region": "us-west-2"
+}
+
+### Invalid Event - Missing Required Fields
+POST http://localhost/events
+Content-Type: application/json
+
+{
+  "device": "smartphone",
+  "valor": "100"
+}
+
+### Invalid Event - Wrong Method
+GET http://localhost/events

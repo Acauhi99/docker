@@ -1,0 +1,253 @@
+version: '3.9'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: '${MONGODB_CPU_LIMIT}'
+          memory: ${MONGODB_MEMORY_LIMIT}
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    tmpfs:
+      - /tmp
+
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - backend
+    ports:
+      - "15672:15672"  # Management UI
+    deploy:
+      resources:
+        limits:
+          cpus: '${RABBITMQ_CPU_LIMIT}'
+          memory: ${RABBITMQ_MEMORY_LIMIT}
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+
+  # Producer API - Instance 1
+  producer-1:
+    build:
+      context: ./producer
+      dockerfile: Dockerfile
+    container_name: producer-1
+    restart: unless-stopped
+    environment:
+      PRODUCER_PORT: ${PRODUCER_PORT}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
+    networks:
+      - backend
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '${PRODUCER_CPU_LIMIT}'
+          memory: ${PRODUCER_MEMORY_LIMIT}
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  # Producer API - Instance 2
+  producer-2:
+    build:
+      context: ./producer
+      dockerfile: Dockerfile
+    container_name: producer-2
+    restart: unless-stopped
+    environment:
+      PRODUCER_PORT: ${PRODUCER_PORT}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
+    networks:
+      - backend
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '${PRODUCER_CPU_LIMIT}'
+          memory: ${PRODUCER_MEMORY_LIMIT}
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  # Producer API - Instance 3
+  producer-3:
+    build:
+      context: ./producer
+      dockerfile: Dockerfile
+    container_name: producer-3
+    restart: unless-stopped
+    environment:
+      PRODUCER_PORT: ${PRODUCER_PORT}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
+    networks:
+      - backend
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '${PRODUCER_CPU_LIMIT}'
+          memory: ${PRODUCER_MEMORY_LIMIT}
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  # Consumer API
+  consumer:
+    build:
+      context: ./consumer
+      dockerfile: Dockerfile
+    container_name: consumer
+    restart: unless-stopped
+    environment:
+      CONSUMER_PORT: ${CONSUMER_PORT}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+      MONGO_COLLECTION: ${MONGO_COLLECTION}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
+    networks:
+      - backend
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '${CONSUMER_CPU_LIMIT}'
+          memory: ${CONSUMER_MEMORY_LIMIT}
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  # NGINX Load Balancer
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "${NGINX_PORT}:80"
+    networks:
+      - backend
+    depends_on:
+      - producer-1
+      - producer-2
+      - producer-3
+    deploy:
+      resources:
+        limits:
+          cpus: '${NGINX_CPU_LIMIT}'
+          memory: ${NGINX_MEMORY_LIMIT}
+        reservations:
+          cpus: '0.1'
+          memory: 32M
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  backend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
+  rabbitmq_data:
+    driver: local

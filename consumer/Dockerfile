@@ -33,9 +33,5 @@ COPY --from=builder /build/consumer /consumer
 # Expose port for health check
 EXPOSE 8081
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD ["/consumer", "-health"]
-
 # Run
 ENTRYPOINT ["/consumer"]

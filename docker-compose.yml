@@ -17,10 +17,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '${MONGODB_CPU_LIMIT}'
+          cpus: "${MONGODB_CPU_LIMIT}"
           memory: ${MONGODB_MEMORY_LIMIT}
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 256M
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
@@ -47,14 +47,14 @@ services:
     networks:
       - backend
     ports:
-      - "15672:15672"  # Management UI
+      - "15672:15672" # Management UI
     deploy:
       resources:
         limits:
-          cpus: '${RABBITMQ_CPU_LIMIT}'
+          cpus: "${RABBITMQ_CPU_LIMIT}"
           memory: ${RABBITMQ_MEMORY_LIMIT}
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 256M
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
@@ -87,10 +87,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '${PRODUCER_CPU_LIMIT}'
+          cpus: "${PRODUCER_CPU_LIMIT}"
           memory: ${PRODUCER_MEMORY_LIMIT}
         reservations:
-          cpus: '0.1'
+          cpus: "0.1"
           memory: 64M
     security_opt:
       - no-new-privileges:true
@@ -120,10 +120,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '${PRODUCER_CPU_LIMIT}'
+          cpus: "${PRODUCER_CPU_LIMIT}"
           memory: ${PRODUCER_MEMORY_LIMIT}
         reservations:
-          cpus: '0.1'
+          cpus: "0.1"
           memory: 64M
     security_opt:
       - no-new-privileges:true
@@ -153,10 +153,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '${PRODUCER_CPU_LIMIT}'
+          cpus: "${PRODUCER_CPU_LIMIT}"
           memory: ${PRODUCER_MEMORY_LIMIT}
         reservations:
-          cpus: '0.1'
+          cpus: "0.1"
           memory: 64M
     security_opt:
       - no-new-privileges:true
@@ -194,10 +194,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '${CONSUMER_CPU_LIMIT}'
+          cpus: "${CONSUMER_CPU_LIMIT}"
           memory: ${CONSUMER_MEMORY_LIMIT}
         reservations:
-          cpus: '0.1'
+          cpus: "0.1"
           memory: 64M
     security_opt:
       - no-new-privileges:true
@@ -223,13 +223,21 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '${NGINX_CPU_LIMIT}'
+          cpus: "${NGINX_CPU_LIMIT}"
           memory: ${NGINX_MEMORY_LIMIT}
         reservations:
-          cpus: '0.1'
+          cpus: "0.1"
           memory: 32M
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost/health",
+        ]
       interval: 10s
       timeout: 3s
       retries: 3
@@ -240,9 +248,6 @@ services:
 networks:
   backend:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
 
 volumes:
   mongodb_data:

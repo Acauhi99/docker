@@ -14,7 +14,7 @@ target "producer" {
   context    = "./producer"
   dockerfile = "Dockerfile"
   tags       = ["${REGISTRY}producer:${TAG}"]
-  platforms  = ["linux/amd64", "linux/arm64"]
+  platforms  = ["linux/amd64"]
   output     = ["type=docker"]
   
   attest = [
@@ -30,7 +30,7 @@ target "consumer" {
   context    = "./consumer"
   dockerfile = "Dockerfile"
   tags       = ["${REGISTRY}consumer:${TAG}"]
-  platforms  = ["linux/amd64", "linux/arm64"]
+  platforms  = ["linux/amd64"]
   output     = ["type=docker"]
   
   attest = [

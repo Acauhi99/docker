@@ -58,7 +58,9 @@ QUEUE_SIZE=$(docker compose exec -T rabbitmq rabbitmqctl list_queues 2>/dev/null
 echo "   - Mensagens na fila: $QUEUE_SIZE"
 
 # Verificar MongoDB
-MONGO_COUNT=$(docker compose exec -T mongodb mongosh -u admin -p secure_password_123 --authenticationDatabase admin --quiet --eval "db.getSiblingDB('events_db').events.countDocuments()" 2>/dev/null)
+# Carregar credenciais do .env
+source .env 2>/dev/null || true
+MONGO_COUNT=$(docker compose exec -T mongodb mongosh -u "${MONGO_INITDB_ROOT_USERNAME:-admin}" -p "${MONGO_INITDB_ROOT_PASSWORD:-password}" --authenticationDatabase admin --quiet --eval "db.getSiblingDB('events_db').events.countDocuments()" 2>/dev/null)
 echo "   - Eventos no MongoDB: $MONGO_COUNT"
 
 # Verificar logs de erro
